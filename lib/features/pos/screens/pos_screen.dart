@@ -402,38 +402,111 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 ? const Center(
                     child: CircularProgressIndicator(),
                   )
-                : filteredList.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Obat tidak ditemukan.',
-                          style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                : searchState.errorMessage != null
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const HeroIcon(HeroIcons.exclamationTriangle,
+                                  size: 36, color: AppColors.danger),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Gagal memuat data obat',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: AppColors.darkBrutal,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                searchState.errorMessage!,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.danger,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              OutlinedButton.icon(
+                                icon: const HeroIcon(HeroIcons.arrowPath, size: 14),
+                                label: const Text('Coba Lagi', style: TextStyle(fontSize: 11)),
+                                onPressed: () {
+                                  ref.read(medicineSearchProvider.notifier).refresh();
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       )
-                    : LayoutBuilder(
-                        builder: (context, constraints) {
-                          final crossCount = constraints.maxWidth > 500 ? 3 : 2;
-
-                          return GridView.builder(
-                            physics: const BouncingScrollPhysics(),
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: crossCount,
-                              childAspectRatio: 0.72,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
+                    : filteredList.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const HeroIcon(HeroIcons.archiveBoxXMark,
+                                      size: 36, color: AppColors.textMuted),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    searchState.selectedCategory != 'Semua'
+                                        ? 'Tidak ada obat dalam kategori "${searchState.selectedCategory}"'
+                                        : searchState.query.isNotEmpty
+                                            ? 'Obat "${searchState.query}" tidak ditemukan'
+                                            : 'Belum ada data obat di database',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: AppColors.darkBrutal,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  if (searchState.selectedCategory != 'Semua') ...[
+                                    const SizedBox(height: 8),
+                                    TextButton(
+                                      onPressed: () {
+                                        ref
+                                            .read(medicineSearchProvider.notifier)
+                                            .selectCategory('Semua');
+                                      },
+                                      child: Text(
+                                        'Tampilkan Semua Kategori (${searchState.medicines.length} Obat)',
+                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                            itemCount: filteredList.length,
-                            itemBuilder: (context, index) {
-                              final medicine = filteredList[index];
-                              return MedicineCard(
-                                medicine: medicine,
-                                onAddToCart: () {
-                                  ref.read(cartProvider.notifier).addToCart(medicine);
+                          )
+                        : LayoutBuilder(
+                            builder: (context, constraints) {
+                              final crossCount = constraints.maxWidth > 500 ? 3 : 2;
+
+                              return GridView.builder(
+                                physics: const BouncingScrollPhysics(),
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossCount,
+                                  childAspectRatio: 0.72,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                ),
+                                itemCount: filteredList.length,
+                                itemBuilder: (context, index) {
+                                  final medicine = filteredList[index];
+                                  return MedicineCard(
+                                    medicine: medicine,
+                                    onAddToCart: () {
+                                      ref.read(cartProvider.notifier).addToCart(medicine);
+                                    },
+                                  );
                                 },
                               );
                             },
-                          );
-                        },
-                      ),
+                          ),
           ),
         ],
       ),

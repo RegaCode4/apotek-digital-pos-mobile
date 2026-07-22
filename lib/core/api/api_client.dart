@@ -24,6 +24,11 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          final savedUrl = await _storageService.getBaseUrl();
+          if (savedUrl != null && savedUrl.isNotEmpty) {
+            options.baseUrl = savedUrl;
+          }
+
           final token = await _storageService.getToken();
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -43,6 +48,12 @@ class ApiClient {
     );
   }
 
+  void updateBaseUrl(String newUrl) {
+    final cleanUrl = newUrl.trim();
+    dio.options.baseUrl = cleanUrl;
+    _storageService.saveBaseUrl(cleanUrl);
+  }
+
   /// Helper untuk mengekstrak pesan error yang user-friendly dalam Bahasa Indonesia
   static String extractErrorMessage(dynamic error) {
     if (error is DioException) {
@@ -54,10 +65,10 @@ class ApiClient {
       }
       if (error.type == DioExceptionType.connectionTimeout ||
           error.type == DioExceptionType.receiveTimeout) {
-        return 'Koneksi ke server terputus/timeout. Periksa koneksi jaringan Anda.';
+        return 'Koneksi ke server terputus/timeout (15 detik). Periksa jaringan Wi-Fi/Hotspot Anda.';
       }
       if (error.type == DioExceptionType.connectionError) {
-        return 'Tidak dapat terhubung ke server (${ApiEndpoints.baseUrl}). Pastikan backend Laravel berjalan.';
+        return 'Tidak dapat terhubung ke server backend. Pastikan server Laravel sedang berjalan.';
       }
       return error.message ?? 'Terjadi kesalahan jaringan.';
     }

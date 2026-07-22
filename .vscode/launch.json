@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Apotek Digital POS (HP Fisik / Hotspot)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=BASE_URL=http://192.168.137.1:8000/api"
+      ]
+    },
+    {
+      "name": "Apotek Digital POS (Android Emulator)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=BASE_URL=http://10.0.2.2:8000/api"
+      ]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import '../models/user.dart';
 class StorageService {
   static const String _keyToken = 'api_token';
   static const String _keyUser = 'user_data';
+  static const String _keyBaseUrl = 'custom_base_url';
 
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -31,6 +32,16 @@ class StorageService {
     } catch (_) {
       return null;
     }
+  }
+
+  Future<void> saveBaseUrl(String url) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyBaseUrl, url.trim());
+  }
+
+  Future<String?> getBaseUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyBaseUrl);
   }
 
   Future<void> clearAuthData() async {

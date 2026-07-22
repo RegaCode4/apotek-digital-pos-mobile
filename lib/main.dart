@@ -3,9 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'shared/theme/app_theme.dart';
-import 'features/auth/providers/auth_provider.dart';
-import 'features/auth/screens/login_screen.dart';
-import 'features/pos/screens/pos_screen.dart';
+import 'features/splash/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,26 +23,16 @@ void main() async {
   );
 }
 
-class ApotekDigitalPosApp extends ConsumerWidget {
+class ApotekDigitalPosApp extends StatelessWidget {
   const ApotekDigitalPosApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Apotek Digital POS',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: authState.isLoading
-          ? const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            )
-          : authState.isAuthenticated
-              ? const PosScreen()
-              : const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }

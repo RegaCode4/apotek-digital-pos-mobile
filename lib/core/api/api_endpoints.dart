@@ -1,15 +1,32 @@
+import 'package:flutter/foundation.dart';
+
 class ApiEndpoints {
-  /// Base URL API dapat diganti saat build/run via `--dart-define=BASE_URL=http://...`
-  /// Default untuk Android Emulator: `http://10.0.2.2:8000/api`
-  static const String baseUrl = String.fromEnvironment(
+  /// Base URL default berdasarkan platform:
+  /// - Web: `http://localhost:8000/api`
+  /// - Mobile/Emulator: `http://10.0.2.2:8000/api`
+  static String get defaultBaseUrl {
+    if (kIsWeb) {
+      return 'http://localhost:8000/api';
+    }
+    return 'http://10.0.2.2:8000/api';
+  }
+
+  static const String _definedBaseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'http://10.0.2.2:8000/api',
+    defaultValue: '',
   );
 
+  static String get baseUrl {
+    if (_definedBaseUrl.isNotEmpty) return _definedBaseUrl;
+    return defaultBaseUrl;
+  }
+
   /// Base Web URL untuk mencetak Struk PDF (misal: `/sistem/pos/struk/{id}`)
-  static String receiptUrl(int saleId) {
-    // Ambil web root dari baseUrl dengan menghapus `/api`
-    final webRoot = baseUrl.replaceAll(RegExp(r'/api/?$'), '');
+  static String receiptUrl(int saleId, {String? customBaseUrl}) {
+    final root = (customBaseUrl != null && customBaseUrl.isNotEmpty)
+        ? customBaseUrl
+        : baseUrl;
+    final webRoot = root.replaceAll(RegExp(r'/api/?$'), '');
     return '$webRoot/sistem/pos/struk/$saleId';
   }
 

@@ -9,12 +9,21 @@ class Category {
     this.description,
   });
 
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
-      id: json['id'] as int,
-      name: json['name'] as String? ?? '',
-      description: json['description'] as String?,
-    );
+  factory Category.fromJson(dynamic json) {
+    if (json == null) {
+      return Category(id: 0, name: '');
+    }
+    if (json is String) {
+      return Category(id: 0, name: json);
+    }
+    if (json is Map) {
+      return Category(
+        id: int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+        name: json['name']?.toString() ?? '',
+        description: json['description']?.toString(),
+      );
+    }
+    return Category(id: 0, name: '');
   }
 
   Map<String, dynamic> toJson() {

@@ -33,8 +33,8 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logoWidget = SvgPicture.string(
-      rawSvg,
+    final logoWidget = SvgPicture.asset(
+      'assets/logo.svg',
       width: size,
       height: size,
     );
