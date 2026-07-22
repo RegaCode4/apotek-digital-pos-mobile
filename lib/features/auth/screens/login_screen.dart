@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/neubrutal_style.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../providers/auth_provider.dart';
@@ -65,20 +66,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // App Icon & Header
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.primarySoft,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const HeroIcon(
-                        HeroIcons.buildingStorefront,
-                        size: 40,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
+                  const AppLogo(size: 52),
                   const SizedBox(height: 16),
                   const Text(
                     'Apotek Digital POS',

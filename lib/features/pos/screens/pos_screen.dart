@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:intl/intl.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/neubrutal_style.dart';
 import '../../../shared/utils/currency_formatter.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/loading_overlay.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -30,6 +33,34 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   final _discountController = TextEditingController();
   final _bpjsClaimController = TextEditingController();
 
+  final List<String> _categories = const [
+    'Semua',
+    'Anti-Infeksi Sistemik',
+    'Antineoplastik',
+    'Antiparasit, Insektisida & Repelen',
+    'Berbagai Macam (Various)',
+    'Darah & Organ Pembentuk Darah',
+    'Dermatologikal',
+    'Organ Sensorik',
+    'Sistem Endokrin',
+    'Sistem Genitourinari & Hormon Seks',
+    'Sistem Kardiovaskular',
+    'Sistem Musculoskeletal',
+    'Sistem Pencernaan & Metabolisme',
+    'Sistem Pernapasan',
+    'Sistem Saraf Pusat',
+    'Vitamin dan Suplemen',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -53,9 +84,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
   void _handleCheckout() async {
     final cartNotifier = ref.read(cartProvider.notifier);
-    cartNotifier.setBuyerName(_buyerNameController.text);
+    cartNotifier.setBuyerName(
+        _buyerNameController.text.trim().isEmpty ? 'Umum' : _buyerNameController.text.trim());
     if (_bpjsClaimController.text.isNotEmpty) {
-      cartNotifier.setBpjsClaimNo(_bpjsClaimController.text);
+      cartNotifier.setBpjsClaimNo(_bpjsClaimController.text.trim());
     }
 
     final sale = await ref.read(transactionProvider.notifier).submitTransaction();
@@ -77,43 +109,58 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final cartState = ref.watch(cartProvider);
     final transactionState = ref.watch(transactionProvider);
 
+    final todayFormatted = DateFormat('EEEE, d MMMM yyyy').format(DateTime.now());
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        toolbarHeight: 52,
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppColors.primarySoft,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const HeroIcon(
-                HeroIcons.buildingStorefront,
-                color: AppColors.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 10),
+            const AppLogo(size: 28),
+            const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
                   'Apotek Digital POS',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Kasir: ${authState.user?.name ?? 'Kasir'}',
-                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  'Kasir: ${authState.user?.name ?? 'Kasir Apotek'}',
+                  style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
                 ),
               ],
             ),
           ],
         ),
         actions: [
-          // Riwayat Transaksi Button
+          // Date Clock display
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            margin: const EdgeInsets.only(right: 6),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceMuted,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.darkBrutal, width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const HeroIcon(HeroIcons.clock, size: 14, color: AppColors.darkBrutal),
+                const SizedBox(width: 4),
+                Text(
+                  todayFormatted,
+                  style: const TextStyle(
+                      fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.darkBrutal),
+                ),
+              ],
+            ),
+          ),
+          // History Button
           IconButton(
-            icon: const HeroIcon(HeroIcons.clock, size: 22),
+            icon: const HeroIcon(HeroIcons.clock, size: 20),
             tooltip: 'Riwayat Transaksi',
             onPressed: () {
               Navigator.of(context).push(
@@ -124,7 +171,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           // Logout Button
           IconButton(
             icon: const HeroIcon(HeroIcons.arrowRightOnRectangle,
-                size: 22, color: AppColors.danger),
+                size: 20, color: AppColors.danger),
             tooltip: 'Logout',
             onPressed: () async {
               final navigator = Navigator.of(context);
@@ -136,7 +183,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               }
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
         ],
       ),
       body: LoadingOverlay(
@@ -148,19 +195,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             if (transactionState.errorMessage != null)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 color: AppColors.dangerSoft,
                 child: Row(
                   children: [
                     const HeroIcon(HeroIcons.exclamationCircle,
-                        color: AppColors.danger, size: 20),
-                    const SizedBox(width: 10),
+                        color: AppColors.danger, size: 18),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         transactionState.errorMessage!,
                         style: const TextStyle(
                           color: AppColors.danger,
-                          fontSize: 13,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -169,405 +216,24 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 ),
               ),
 
+            // ALWAYS 2-Panel Landscape Web Layout
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ================= PANEL ATAS: KATALOG & SEARCH OBAT =================
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: NeubrutalStyle.card(
-                        shadowOffset: 4.0,
-                        borderRadius: 16.0,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const HeroIcon(HeroIcons.magnifyingGlass,
-                                  color: AppColors.primary, size: 20),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Katalog & Pencarian Obat',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.darkBrutal,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Search Bar & Barcode Scanner
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _searchController,
-                                  onChanged: _onSearchChanged,
-                                  decoration: InputDecoration(
-                                    hintText: 'Cari obat (nama, generik, produsen)...',
-                                    prefixIcon: const Icon(Icons.search, color: AppColors.textMuted),
-                                    suffixIcon: _searchController.text.isNotEmpty
-                                        ? IconButton(
-                                            icon: const Icon(Icons.clear, size: 18),
-                                            onPressed: () {
-                                              _searchController.clear();
-                                              _onSearchChanged('');
-                                            },
-                                          )
-                                        : null,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              InkWell(
-                                onTap: _openBarcodeScanner,
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: NeubrutalStyle.card(
-                                    backgroundColor: AppColors.primarySoft,
-                                    shadowOffset: 2.0,
-                                    borderRadius: 12.0,
-                                  ),
-                                  child: const HeroIcon(
-                                    HeroIcons.qrCode,
-                                    color: AppColors.darkBrutal,
-                                    size: 24,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Medicine Card Grid/List
-                          if (searchState.isLoading)
-                            const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(24),
-                                child: CircularProgressIndicator(),
-                              ),
-                            )
-                          else if (searchState.medicines.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.all(24),
-                              child: Center(
-                                child: Text(
-                                  'Obat tidak ditemukan.',
-                                  style: TextStyle(color: AppColors.textMuted),
-                                ),
-                              ),
-                            )
-                          else
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                                childAspectRatio: 0.82,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                              ),
-                              itemCount: searchState.medicines.length,
-                              itemBuilder: (context, index) {
-                                final medicine = searchState.medicines[index];
-                                return MedicineCard(
-                                  medicine: medicine,
-                                  onAddToCart: () {
-                                    ref.read(cartProvider.notifier).addToCart(medicine);
-                                  },
-                                );
-                              },
-                            ),
-                        ],
-                      ),
+                    // LEFT PANEL: Search & Medicine Catalog
+                    Expanded(
+                      flex: 6,
+                      child: _buildLeftPanel(context, searchState),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(width: 10),
 
-                    // ================= PANEL BAWAH: KERANJANG BELANJA & CHECKOUT =================
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: NeubrutalStyle.card(
-                        shadowOffset: 4.0,
-                        borderRadius: 16.0,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  const HeroIcon(HeroIcons.shoppingCart,
-                                      color: AppColors.primary, size: 20),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Keranjang Belanja (${cartState.items.length})',
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.darkBrutal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (cartState.items.isNotEmpty)
-                                TextButton.icon(
-                                  icon: const HeroIcon(HeroIcons.trash,
-                                      size: 16, color: AppColors.danger),
-                                  label: const Text(
-                                    'Kosongkan',
-                                    style: TextStyle(color: AppColors.danger, fontSize: 12),
-                                  ),
-                                  onPressed: () {
-                                    ref.read(cartProvider.notifier).resetCart();
-                                  },
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-
-                          if (cartState.items.isEmpty)
-                            Container(
-                              padding: const EdgeInsets.all(32),
-                              alignment: Alignment.center,
-                              child: const Column(
-                                children: [
-                                  HeroIcon(HeroIcons.shoppingBag,
-                                      size: 40, color: AppColors.textMuted),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'Keranjang masih kosong',
-                                    style: TextStyle(
-                                      color: AppColors.textMuted,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Tap (+) pada obat untuk menambah ke keranjang',
-                                    style: TextStyle(
-                                      color: AppColors.textMuted,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          else ...[
-                            // Cart items list
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: cartState.items.length,
-                              itemBuilder: (context, index) {
-                                final item = cartState.items[index];
-                                return CartItemTile(
-                                  item: item,
-                                  onQuantityChanged: (qty) {
-                                    ref
-                                        .read(cartProvider.notifier)
-                                        .updateQuantity(item.medicine.id, qty);
-                                  },
-                                  onPrescriptionChanged: (prescriptionNo) {
-                                    ref
-                                        .read(cartProvider.notifier)
-                                        .updatePrescriptionNo(item.medicine.id, prescriptionNo);
-                                  },
-                                  onRemove: () {
-                                    ref
-                                        .read(cartProvider.notifier)
-                                        .removeFromCart(item.medicine.id);
-                                  },
-                                );
-                              },
-                            ),
-                            const Divider(height: 24),
-
-                            // Customer & Payment Details Form
-                            const Text(
-                              'Informasi Pelanggan & Pembayaran',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.darkBrutal,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-
-                            // Buyer name
-                            TextField(
-                              controller: _buyerNameController,
-                              decoration: const InputDecoration(
-                                labelText: 'Nama Pembeli',
-                                hintText: 'misal: Budi Santoso (Default: Umum)',
-                                isDense: true,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-
-                            // Payment method selector
-                            Row(
-                              children: [
-                                const Text(
-                                  'Metode Bayar: ',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: DropdownButtonFormField<String>(
-                                    initialValue: cartState.paymentMethod,
-                                    isDense: true,
-                                    decoration: const InputDecoration(
-                                      contentPadding:
-                                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    ),
-                                    items: const [
-                                      DropdownMenuItem(value: 'cash', child: Text('Tunai (Cash)')),
-                                      DropdownMenuItem(value: 'transfer', child: Text('Transfer Bank')),
-                                      DropdownMenuItem(value: 'bpjs', child: Text('BPJS Kesehatan')),
-                                      DropdownMenuItem(value: 'insurance', child: Text('Asuransi Swasta')),
-                                    ],
-                                    onChanged: (val) {
-                                      if (val != null) {
-                                        ref.read(cartProvider.notifier).setPaymentMethod(val);
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            // BPJS Claim No input (if BPJS selected)
-                            if (cartState.paymentMethod == 'bpjs') ...[
-                              const SizedBox(height: 10),
-                              TextField(
-                                controller: _bpjsClaimController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Nomor Klaim BPJS *',
-                                  hintText: 'misal: BPJS-202506-0081',
-                                  isDense: true,
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 16),
-
-                            // Summary Calculator
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceMuted,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text('Subtotal', style: TextStyle(fontSize: 13)),
-                                      Text(
-                                        CurrencyFormatter.format(cartState.subtotal),
-                                        style: const TextStyle(
-                                            fontSize: 13, fontWeight: FontWeight.w600),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-
-                                  // Discount Input Row
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text('Diskon (Rp)', style: TextStyle(fontSize: 13)),
-                                      SizedBox(
-                                        width: 120,
-                                        height: 36,
-                                        child: TextField(
-                                          controller: _discountController,
-                                          keyboardType: TextInputType.number,
-                                          style: const TextStyle(fontSize: 12),
-                                          decoration: const InputDecoration(
-                                            hintText: '0',
-                                            contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                                          ),
-                                          onChanged: (val) {
-                                            final discount = double.tryParse(val) ?? 0.0;
-                                            ref
-                                                .read(cartProvider.notifier)
-                                                .setDiscountAmount(discount);
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-
-                                  // Tax Toggle Switch (11% PPN)
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          const Text('PPN 11%', style: TextStyle(fontSize: 13)),
-                                          Switch(
-                                            value: cartState.isTaxEnabled,
-                                            activeThumbColor: AppColors.primary,
-                                            onChanged: (val) {
-                                              ref.read(cartProvider.notifier).toggleTax(val);
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                      Text(
-                                        CurrencyFormatter.format(cartState.taxAmount),
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                    ],
-                                  ),
-                                  const Divider(height: 16),
-
-                                  // Grand Total
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text(
-                                        'Grand Total',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.darkBrutal,
-                                        ),
-                                      ),
-                                      Text(
-                                        CurrencyFormatter.format(cartState.grandTotal),
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.primary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Submit Button
-                            CustomButton(
-                              text: 'Proses Transaksi',
-                              icon: Icons.check_circle_outline,
-                              onPressed: _handleCheckout,
-                            ),
-                          ],
-                        ],
-                      ),
+                    // RIGHT PANEL: Shopping Cart & Checkout
+                    Expanded(
+                      flex: 5,
+                      child: _buildRightPanel(context, cartState),
                     ),
                   ],
                 ),
@@ -576,6 +242,553 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildLeftPanel(BuildContext context, MedicineSearchState searchState) {
+    final filteredList = searchState.filteredMedicines;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: NeubrutalStyle.card(
+        shadowOffset: 3.0,
+        borderRadius: 14.0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Panel Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  HeroIcon(HeroIcons.magnifyingGlass, color: AppColors.primary, size: 18),
+                  SizedBox(width: 6),
+                  Text(
+                    'Cari Obat',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkBrutal,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: NeubrutalStyle.badge(
+                  backgroundColor: AppColors.primarySoft,
+                  borderColor: AppColors.primary,
+                ),
+                child: Text(
+                  '${filteredList.length} Obat',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkBrutal,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Search Bar & Barcode Scanner
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    style: const TextStyle(fontSize: 12),
+                    decoration: InputDecoration(
+                      hintText: 'Ketik nama merek atau generik...',
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                      prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.textMuted),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 16),
+                              onPressed: () {
+                                _searchController.clear();
+                                _onSearchChanged('');
+                              },
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              InkWell(
+                onTap: _openBarcodeScanner,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: NeubrutalStyle.card(
+                    backgroundColor: AppColors.primarySoft,
+                    shadowOffset: 2.0,
+                    borderRadius: 10.0,
+                  ),
+                  child: const HeroIcon(
+                    HeroIcons.qrCode,
+                    color: AppColors.darkBrutal,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Category Filter Chips
+          SizedBox(
+            height: 32,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _categories.length,
+              itemBuilder: (context, index) {
+                final cat = _categories[index];
+                final isSelected = searchState.selectedCategory == cat;
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 5),
+                  child: InkWell(
+                    onTap: () {
+                      ref.read(medicineSearchProvider.notifier).selectCategory(cat);
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.primarySoft : AppColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected ? AppColors.primary : AppColors.darkBrutal,
+                          width: isSelected ? 1.8 : 1.0,
+                        ),
+                        boxShadow: isSelected
+                            ? [
+                                const BoxShadow(
+                                  color: AppColors.darkBrutal,
+                                  offset: Offset(1.2, 1.2),
+                                  blurRadius: 0,
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Text(
+                        cat,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: AppColors.darkBrutal,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Medicine Grid
+          Expanded(
+            child: searchState.isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : filteredList.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Obat tidak ditemukan.',
+                          style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                        ),
+                      )
+                    : LayoutBuilder(
+                        builder: (context, constraints) {
+                          final crossCount = constraints.maxWidth > 500 ? 3 : 2;
+
+                          return GridView.builder(
+                            physics: const BouncingScrollPhysics(),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossCount,
+                              childAspectRatio: 0.72,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                            itemCount: filteredList.length,
+                            itemBuilder: (context, index) {
+                              final medicine = filteredList[index];
+                              return MedicineCard(
+                                medicine: medicine,
+                                onAddToCart: () {
+                                  ref.read(cartProvider.notifier).addToCart(medicine);
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRightPanel(BuildContext context, CartState cartState) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: NeubrutalStyle.card(
+        shadowOffset: 3.0,
+        borderRadius: 14.0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cart Header (Fixed at top of right panel)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const HeroIcon(HeroIcons.shoppingCart, color: AppColors.primary, size: 18),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Keranjang Belanja',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkBrutal,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: NeubrutalStyle.badge(
+                      backgroundColor: AppColors.primarySoft,
+                      borderColor: AppColors.primary,
+                    ),
+                    child: Text(
+                      '${cartState.items.length} item',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkBrutal,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (cartState.items.isNotEmpty)
+                InkWell(
+                  onTap: () {
+                    ref.read(cartProvider.notifier).resetCart();
+                  },
+                  child: const Row(
+                    children: [
+                      HeroIcon(HeroIcons.trash, size: 14, color: AppColors.danger),
+                      SizedBox(width: 3),
+                      Text(
+                        'Kosongkan',
+                        style: TextStyle(color: AppColors.danger, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Scrollable Body for Cart Items & Payment Checkout
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (cartState.items.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      alignment: Alignment.center,
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          HeroIcon(HeroIcons.shoppingBag, size: 38, color: AppColors.textMuted),
+                          SizedBox(height: 8),
+                          Text(
+                            'Keranjang masih kosong',
+                            style: TextStyle(
+                              color: AppColors.darkBrutal,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Pilih obat di panel sebelah kiri untuk menambah pesanan',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else ...[
+                    // Cart Items List
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: cartState.items.length,
+                      itemBuilder: (context, index) {
+                        final item = cartState.items[index];
+                        return CartItemTile(
+                          item: item,
+                          onQuantityChanged: (qty) {
+                            ref.read(cartProvider.notifier).updateQuantity(item.medicine.id, qty);
+                          },
+                          onPrescriptionChanged: (prescriptionNo) {
+                            ref
+                                .read(cartProvider.notifier)
+                                .updatePrescriptionNo(item.medicine.id, prescriptionNo);
+                          },
+                          onRemove: () {
+                            ref.read(cartProvider.notifier).removeFromCart(item.medicine.id);
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Price Summary Container
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: NeubrutalStyle.card(
+                        backgroundColor: AppColors.surfaceMuted,
+                        borderColor: AppColors.darkBrutal,
+                        shadowOffset: 1.5,
+                        borderRadius: 10.0,
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Subtotal',
+                                  style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                              Text(
+                                CurrencyFormatter.format(cartState.subtotal),
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.darkBrutal),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+
+                          // Discount Input Row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Diskon (Rp)',
+                                  style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                              SizedBox(
+                                width: 110,
+                                height: 32,
+                                child: TextField(
+                                  controller: _discountController,
+                                  keyboardType: TextInputType.number,
+                                  style: const TextStyle(
+                                      fontSize: 11, fontWeight: FontWeight.bold),
+                                  decoration: const InputDecoration(
+                                    hintText: '0',
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                                  ),
+                                  onChanged: (val) {
+                                    final discount = double.tryParse(val) ?? 0.0;
+                                    ref.read(cartProvider.notifier).setDiscountAmount(discount);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+
+                          // Tax Toggle Switch (11% PPN)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  const Text('PPN 11%',
+                                      style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                                  const SizedBox(width: 4),
+                                  SizedBox(
+                                    height: 20,
+                                    child: Switch(
+                                      value: cartState.isTaxEnabled,
+                                      activeThumbColor: AppColors.primary,
+                                      onChanged: (val) {
+                                        ref.read(cartProvider.notifier).toggleTax(val);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                CurrencyFormatter.format(cartState.taxAmount),
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.darkBrutal),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 12),
+
+                          // Grand Total
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Grand Total',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.darkBrutal,
+                                ),
+                              ),
+                              Text(
+                                CurrencyFormatter.format(cartState.grandTotal),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Customer Details Form
+                    const Text(
+                      'Nama Pembeli *',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkBrutal,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      height: 36,
+                      child: TextField(
+                        controller: _buyerNameController,
+                        style: const TextStyle(fontSize: 12),
+                        decoration: const InputDecoration(
+                          hintText: 'Nama lengkap pembeli...',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Payment Method Selectors (4 distinct buttons: Cash, Transfer, BPJS, Asuransi)
+                    const Text(
+                      'Metode Pembayaran',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkBrutal,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    _buildPaymentMethodGrid(cartState),
+
+                    // BPJS Claim No input (if BPJS selected)
+                    if (cartState.paymentMethod == 'bpjs') ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 36,
+                        child: TextField(
+                          controller: _bpjsClaimController,
+                          style: const TextStyle(fontSize: 12),
+                          decoration: const InputDecoration(
+                            hintText: 'Nomor Klaim BPJS * (misal: BPJS-202607-0081)',
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+
+                    // Action Submit Button
+                    CustomButton(
+                      text: 'Proses Transaksi',
+                      icon: Icons.check_circle_outline,
+                      onPressed: _handleCheckout,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodGrid(CartState cartState) {
+    final methods = [
+      {'id': 'cash', 'label': 'Cash'},
+      {'id': 'transfer', 'label': 'Transfer'},
+      {'id': 'bpjs', 'label': 'BPJS'},
+      {'id': 'insurance', 'label': 'Asuransi'},
+    ];
+
+    return Row(
+      children: methods.map((m) {
+        final isSelected = cartState.paymentMethod == m['id'];
+        return Expanded(
+          child: Container(
+            margin: const EdgeInsets.only(right: 5),
+            child: InkWell(
+              onTap: () => ref.read(cartProvider.notifier).setPaymentMethod(m['id']!),
+              borderRadius: BorderRadius.circular(8),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                alignment: Alignment.center,
+                decoration: NeubrutalStyle.card(
+                  backgroundColor: isSelected ? AppColors.primarySoft : AppColors.surface,
+                  borderColor: isSelected ? AppColors.primary : AppColors.darkBrutal,
+                  borderWidth: isSelected ? 1.8 : 1.0,
+                  borderRadius: 8.0,
+                  shadowOffset: isSelected ? 2.0 : 1.0,
+                ),
+                child: Text(
+                  m['label']!,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    color: AppColors.darkBrutal,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

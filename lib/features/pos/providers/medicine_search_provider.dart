@@ -5,25 +5,41 @@ import '../../../core/providers/core_providers.dart';
 class MedicineSearchState {
   final bool isLoading;
   final String query;
+  final String selectedCategory;
   final List<Medicine> medicines;
   final String? errorMessage;
 
   const MedicineSearchState({
     this.isLoading = false,
     this.query = '',
+    this.selectedCategory = 'Semua',
     this.medicines = const [],
     this.errorMessage,
   });
 
+  List<Medicine> get filteredMedicines {
+    if (selectedCategory == 'Semua' || selectedCategory.trim().isEmpty) {
+      return medicines;
+    }
+    final targetCat = selectedCategory.toLowerCase().trim();
+    return medicines.where((m) {
+      final catName = m.category?.name.toLowerCase().trim() ?? '';
+      if (catName.isEmpty) return false;
+      return catName.contains(targetCat) || targetCat.contains(catName);
+    }).toList();
+  }
+
   MedicineSearchState copyWith({
     bool? isLoading,
     String? query,
+    String? selectedCategory,
     List<Medicine>? medicines,
     String? errorMessage,
   }) {
     return MedicineSearchState(
       isLoading: isLoading ?? this.isLoading,
       query: query ?? this.query,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
       medicines: medicines ?? this.medicines,
       errorMessage: errorMessage,
     );
@@ -52,6 +68,10 @@ class MedicineSearchNotifier extends StateNotifier<MedicineSearchState> {
         errorMessage: e.toString().replaceAll('Exception: ', ''),
       );
     }
+  }
+
+  void selectCategory(String category) {
+    state = state.copyWith(selectedCategory: category);
   }
 
   void refresh() {

@@ -44,7 +44,7 @@ class MedicineCard extends StatelessWidget {
           onTap: isOutOfStock ? null : onAddToCart,
           borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -56,7 +56,7 @@ class MedicineCard extends StatelessWidget {
                     if (medicine.category != null)
                       Flexible(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: NeubrutalStyle.badge(
                             backgroundColor: AppColors.surfaceMuted,
                             borderColor: AppColors.darkBrutal,
@@ -74,7 +74,8 @@ class MedicineCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                    if (medicine.requiresPrescription)
+                    if (medicine.requiresPrescription) ...[
+                      const SizedBox(width: 4),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: NeubrutalStyle.badge(
@@ -87,7 +88,7 @@ class MedicineCard extends StatelessWidget {
                           children: [
                             HeroIcon(HeroIcons.documentText,
                                 size: 10, color: AppColors.warning),
-                            SizedBox(width: 3),
+                            SizedBox(width: 2),
                             Text(
                               'Resep',
                               style: TextStyle(
@@ -99,87 +100,102 @@ class MedicineCard extends StatelessWidget {
                           ],
                         ),
                       ),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
 
                 // Title & Generic Name
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      medicine.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isOutOfStock ? AppColors.danger : AppColors.darkBrutal,
-                      ),
-                    ),
-                    if (medicine.genericName != null && medicine.genericName!.isNotEmpty)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                       Text(
-                        medicine.genericName!,
-                        maxLines: 1,
+                        medicine.name,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textMuted,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isOutOfStock ? AppColors.danger : AppColors.darkBrutal,
                         ),
                       ),
-                  ],
+                      if (medicine.genericName != null && medicine.genericName!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          medicine.genericName!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
 
                 // Footer: Price, Stock & Add Button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          CurrencyFormatter.format(medicine.price),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            HeroIcon(
-                              HeroIcons.archiveBox,
-                              size: 12,
-                              color: isOutOfStock
-                                  ? AppColors.danger
-                                  : isLowStock
-                                      ? AppColors.warning
-                                      : AppColors.textMuted,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            CurrencyFormatter.format(medicine.price),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              isOutOfStock
-                                  ? 'Stok Habis'
-                                  : 'Stok: ${medicine.stock} ${medicine.unit}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: isOutOfStock || isLowStock
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              HeroIcon(
+                                HeroIcons.archiveBox,
+                                size: 11,
                                 color: isOutOfStock
                                     ? AppColors.danger
                                     : isLowStock
                                         ? AppColors.warning
                                         : AppColors.textMuted,
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              const SizedBox(width: 3),
+                              Expanded(
+                                child: Text(
+                                  isOutOfStock
+                                      ? 'Stok Habis'
+                                      : 'Stok: ${medicine.stock} ${medicine.unit}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: isOutOfStock || isLowStock
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isOutOfStock
+                                        ? AppColors.danger
+                                        : isLowStock
+                                            ? AppColors.warning
+                                            : AppColors.textMuted,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 4),
 
                     // Add Button
                     Container(
@@ -192,10 +208,10 @@ class MedicineCard extends StatelessWidget {
                         onTap: isOutOfStock ? null : onAddToCart,
                         borderRadius: BorderRadius.circular(6),
                         child: const Padding(
-                          padding: EdgeInsets.all(6),
+                          padding: EdgeInsets.all(5),
                           child: HeroIcon(
                             HeroIcons.plus,
-                            size: 18,
+                            size: 16,
                             color: Colors.white,
                           ),
                         ),
