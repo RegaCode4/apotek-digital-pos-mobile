@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/neubrutal_style.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../providers/auth_provider.dart';
@@ -53,17 +54,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Container(
             constraints: const BoxConstraints(maxWidth: 420),
             padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.borderSoft),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.darkBrutal.withAlpha(15),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+            decoration: NeubrutalStyle.card(
+              shadowOffset: 5.0,
+              borderRadius: 16.0,
             ),
             child: Form(
               key: _formKey,

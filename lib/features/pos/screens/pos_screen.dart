@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/neubrutal_style.dart';
 import '../../../shared/utils/currency_formatter.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/loading_overlay.dart';
@@ -177,10 +178,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     // ================= PANEL ATAS: KATALOG & SEARCH OBAT =================
                     Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.borderSoft),
+                      decoration: NeubrutalStyle.card(
+                        shadowOffset: 4.0,
+                        borderRadius: 16.0,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,14 +230,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 child: Container(
                                   padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primarySoft,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.primary.withAlpha(77)),
+                                  decoration: NeubrutalStyle.card(
+                                    backgroundColor: AppColors.primarySoft,
+                                    shadowOffset: 2.0,
+                                    borderRadius: 12.0,
                                   ),
                                   child: const HeroIcon(
                                     HeroIcons.qrCode,
-                                    color: AppColors.primary,
+                                    color: AppColors.darkBrutal,
                                     size: 24,
                                   ),
                                 ),
@@ -293,10 +293,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     // ================= PANEL BAWAH: KERANJANG BELANJA & CHECKOUT =================
                     Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.borderSoft),
+                      decoration: NeubrutalStyle.card(
+                        shadowOffset: 4.0,
+                        borderRadius: 16.0,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

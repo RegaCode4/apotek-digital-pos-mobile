@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../core/models/sale.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/neubrutal_style.dart';
 import '../../../shared/utils/currency_formatter.dart';
 import '../../../shared/utils/date_formatter.dart';
 import '../../../shared/widgets/custom_button.dart';
@@ -43,17 +44,9 @@ class SuccessScreen extends StatelessWidget {
           child: Container(
             constraints: const BoxConstraints(maxWidth: 420),
             padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.borderSoft),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.darkBrutal.withAlpha(20),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+            decoration: NeubrutalStyle.card(
+              shadowOffset: 5.0,
+              borderRadius: 20.0,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

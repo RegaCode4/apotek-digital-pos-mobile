@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/neubrutal_style.dart';
 import '../../../shared/utils/currency_formatter.dart';
 
 class CartItemTile extends StatelessWidget {
@@ -27,15 +28,11 @@ class CartItemTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isPrescriptionMissing
-              ? AppColors.warning.withAlpha(204)
-              : AppColors.borderSoft,
-          width: isPrescriptionMissing ? 1.5 : 1.0,
-        ),
+      decoration: NeubrutalStyle.card(
+        backgroundColor: AppColors.surface,
+        borderColor: isPrescriptionMissing ? AppColors.warning : AppColors.darkBrutal,
+        borderWidth: 2.0,
+        shadowOffset: 3.0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
