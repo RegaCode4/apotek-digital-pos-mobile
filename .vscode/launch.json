@@ -6,7 +6,7 @@
       "request": "launch",
       "type": "dart",
       "args": [
-        "--dart-define=BASE_URL=http://192.168.137.1:8000/api"
+        "--dart-define=BASE_URL=http://10.121.214.156:8000/api"
       ]
     },
     {
