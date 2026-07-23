@@ -44,7 +44,7 @@ class MedicineCard extends StatelessWidget {
           onTap: isOutOfStock ? null : onAddToCart,
           borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -56,18 +56,18 @@ class MedicineCard extends StatelessWidget {
                     if (medicine.category != null)
                       Flexible(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                           decoration: NeubrutalStyle.badge(
                             backgroundColor: AppColors.surfaceMuted,
                             borderColor: AppColors.darkBrutal,
-                            borderRadius: 6.0,
+                            borderRadius: 5.0,
                           ),
                           child: Text(
                             medicine.category!.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 10,
+                              fontSize: 9,
                               fontWeight: FontWeight.bold,
                               color: AppColors.darkBrutal,
                             ),
@@ -77,22 +77,22 @@ class MedicineCard extends StatelessWidget {
                     if (medicine.requiresPrescription) ...[
                       const SizedBox(width: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                         decoration: NeubrutalStyle.badge(
                           backgroundColor: AppColors.warningSoft,
                           borderColor: AppColors.warning,
-                          borderRadius: 6.0,
+                          borderRadius: 5.0,
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             HeroIcon(HeroIcons.documentText,
-                                size: 10, color: AppColors.warning),
+                                size: 9, color: AppColors.warning),
                             SizedBox(width: 2),
                             Text(
                               'Resep',
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 9,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.warning,
                               ),
@@ -103,7 +103,7 @@ class MedicineCard extends StatelessWidget {
                     ],
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
 
                 // Title & Generic Name
                 Expanded(
@@ -116,8 +116,9 @@ class MedicineCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
+                          height: 1.15,
                           color: isOutOfStock ? AppColors.danger : AppColors.darkBrutal,
                         ),
                       ),
@@ -128,7 +129,7 @@ class MedicineCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 10,
                             color: AppColors.textMuted,
                           ),
                         ),
@@ -136,7 +137,7 @@ class MedicineCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
 
                 // Footer: Price, Stock & Add Button
                 Row(
@@ -146,30 +147,30 @@ class MedicineCard extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             CurrencyFormatter.format(medicine.price),
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 2),
                           Row(
                             children: [
                               HeroIcon(
                                 HeroIcons.archiveBox,
-                                size: 11,
+                                size: 10,
                                 color: isOutOfStock
                                     ? AppColors.danger
                                     : isLowStock
                                         ? AppColors.warning
                                         : AppColors.textMuted,
                               ),
-                              const SizedBox(width: 3),
+                              const SizedBox(width: 2),
                               Expanded(
                                 child: Text(
                                   isOutOfStock
@@ -178,7 +179,7 @@ class MedicineCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 9.5,
                                     fontWeight: isOutOfStock || isLowStock
                                         ? FontWeight.bold
                                         : FontWeight.normal,
@@ -201,17 +202,17 @@ class MedicineCard extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         color: isOutOfStock ? Colors.grey.shade300 : AppColors.primary,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.darkBrutal, width: 1.5),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppColors.darkBrutal, width: 1.2),
                       ),
                       child: InkWell(
                         onTap: isOutOfStock ? null : onAddToCart,
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(5),
                         child: const Padding(
-                          padding: EdgeInsets.all(5),
+                          padding: EdgeInsets.all(4),
                           child: HeroIcon(
                             HeroIcons.plus,
-                            size: 16,
+                            size: 14,
                             color: Colors.white,
                           ),
                         ),

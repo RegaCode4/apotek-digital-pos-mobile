@@ -32,6 +32,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   final _buyerNameController = TextEditingController(text: 'Umum');
   final _discountController = TextEditingController();
   final _bpjsClaimController = TextEditingController();
+  final _categoryScrollController = ScrollController();
 
   final List<String> _categories = const [
     'Semua',
@@ -67,6 +68,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     _buyerNameController.dispose();
     _discountController.dispose();
     _bpjsClaimController.dispose();
+    _categoryScrollController.dispose();
     super.dispose();
   }
 
@@ -346,52 +348,86 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           // Category Filter Chips
           SizedBox(
             height: 32,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _categories.length,
-              itemBuilder: (context, index) {
-                final cat = _categories[index];
-                final isSelected = searchState.selectedCategory == cat;
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    _categoryScrollController.animateTo(
+                      (_categoryScrollController.offset - 200).clamp(0.0, _categoryScrollController.position.maxScrollExtent),
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  icon: const HeroIcon(HeroIcons.chevronLeft, size: 16, color: AppColors.darkBrutal),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                  tooltip: 'Geser Kiri',
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: _categoryScrollController,
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: _categories.length,
+                    itemBuilder: (context, index) {
+                      final cat = _categories[index];
+                      final isSelected = searchState.selectedCategory == cat;
 
-                return Padding(
-                  padding: const EdgeInsets.only(right: 5),
-                  child: InkWell(
-                    onTap: () {
-                      ref.read(medicineSearchProvider.notifier).selectCategory(cat);
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 5),
+                        child: InkWell(
+                          onTap: () {
+                            ref.read(medicineSearchProvider.notifier).selectCategory(cat);
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppColors.primarySoft : AppColors.surface,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isSelected ? AppColors.primary : AppColors.darkBrutal,
+                                width: isSelected ? 1.8 : 1.0,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      const BoxShadow(
+                                        color: AppColors.darkBrutal,
+                                        offset: Offset(1.2, 1.2),
+                                        blurRadius: 0,
+                                      )
+                                    ]
+                                  : null,
+                            ),
+                            child: Text(
+                              cat,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                color: AppColors.darkBrutal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
                     },
-                    borderRadius: BorderRadius.circular(16),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primarySoft : AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isSelected ? AppColors.primary : AppColors.darkBrutal,
-                          width: isSelected ? 1.8 : 1.0,
-                        ),
-                        boxShadow: isSelected
-                            ? [
-                                const BoxShadow(
-                                  color: AppColors.darkBrutal,
-                                  offset: Offset(1.2, 1.2),
-                                  blurRadius: 0,
-                                )
-                              ]
-                            : null,
-                      ),
-                      child: Text(
-                        cat,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: AppColors.darkBrutal,
-                        ),
-                      ),
-                    ),
                   ),
-                );
-              },
+                ),
+                IconButton(
+                  onPressed: () {
+                    _categoryScrollController.animateTo(
+                      (_categoryScrollController.offset + 200).clamp(0.0, _categoryScrollController.position.maxScrollExtent),
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  icon: const HeroIcon(HeroIcons.chevronRight, size: 16, color: AppColors.darkBrutal),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                  tooltip: 'Geser Kanan',
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -484,13 +520,18 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           )
                         : LayoutBuilder(
                             builder: (context, constraints) {
-                              final crossCount = constraints.maxWidth > 500 ? 3 : 2;
+                              int crossCount = 2;
+                              if (constraints.maxWidth > 650) {
+                                crossCount = 4;
+                              } else if (constraints.maxWidth > 420) {
+                                crossCount = 3;
+                              }
 
                               return GridView.builder(
                                 physics: const BouncingScrollPhysics(),
                                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: crossCount,
-                                  childAspectRatio: 0.72,
+                                  childAspectRatio: crossCount >= 4 ? 1.15 : (crossCount == 3 ? 1.05 : 1.0),
                                   crossAxisSpacing: 8,
                                   mainAxisSpacing: 8,
                                 ),
